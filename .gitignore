@@ -1,0 +1,21 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Package files (You requested this)
+package.json
+package-lock.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+
+# Optional: Ignore build/dist folders (if you build frontend or use TypeScript)
+dist/
+build/
