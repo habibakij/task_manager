@@ -20,15 +20,4 @@ db.connect((err) => {
   console.log("Connected to the database");
 });
 
-// Function to create a new user
-const createUser = (userData, callback) => {
-  const { name, email, phone, password } = userData;
-  const query =
-    "INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)";
-  db.query(query, [name, email, phone, password], (err, results) => {
-    if (err) {
-      return callback(err);
-    }
-    callback(null, results);
-  });
-};
+module.exports = db;

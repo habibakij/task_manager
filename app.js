@@ -32,10 +32,3 @@ app.listen(port, () => {
 
 // export the app for testing purposes
 module.exports = app;
-
-// export the app for testing purposes
-if (require.main === module) {
-  app.listen(port, () => {
-    console.log(`Server is listening on port ${port}...`);
-  });
-}

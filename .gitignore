@@ -5,8 +5,6 @@ node_modules/
 .env
 
 # Package files (You requested this)
-package.json
-package-lock.json
 
 # Logs
 logs

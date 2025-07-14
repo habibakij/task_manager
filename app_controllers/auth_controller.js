@@ -1,4 +1,4 @@
-export const register = async (req, res) => {
+var register = async (req, res) => {
   const { name, userEmail, userPhone, password } = req.body;
 
   // Validate input
@@ -34,7 +34,7 @@ export const register = async (req, res) => {
   res.status(201).json({ message: "Registration success", user: { userInfo } });
 };
 
-export const login = async (req, res) => {
+var login = async (req, res) => {
   const { userEmail, password } = req.body;
 
   // Validate input
@@ -60,3 +60,6 @@ export const login = async (req, res) => {
     .status(200)
     .json({ message: "User logged in successfully", user: { userEmail } });
 };
+
+// Export the functions
+module.exports = { register, login };
