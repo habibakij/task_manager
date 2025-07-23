@@ -1,5 +1,13 @@
 var register = async (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, ...extraFields } = req.body;
+
+
+  // Reject if there are any unexpected fields
+  if (Object.keys(extraFields).length > 0) {
+    return res.status(400).json({
+      error: `Unexpected fields: ${Object.keys(extraFields).join(", ")}`,
+    });
+  }
 
   // Validate input
   if (!name) {
@@ -35,7 +43,15 @@ var register = async (req, res) => {
 };
 
 var login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, ...extraFields } = req.body;
+
+  // Reject if there are any unexpected fields
+  if (Object.keys(extraFields).length > 0) {
+    return res.status(400).json({
+      error: `Unexpected fields: ${Object.keys(extraFields).join(", ")}`,
+    });
+  }
+
 
   // Validate input
   if (!email) {
