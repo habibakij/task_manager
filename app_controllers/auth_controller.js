@@ -1,5 +1,5 @@
 var register = async (req, res) => {
-  const { name, userEmail, userPhone, password } = req.body;
+  const { name, email, phone, password } = req.body;
 
   // Validate input
   if (!name) {
@@ -8,13 +8,13 @@ var register = async (req, res) => {
       .json({ error: "Name is required, Please enter your name" });
   }
 
-  if (!userEmail) {
+  if (!email) {
     return res
       .status(400)
       .json({ error: "Email is required, Please enter your email" });
   }
 
-  if (!userPhone) {
+  if (!phone) {
     return res.status(400).json({
       error: "Phone number is required, Please enter your phone number",
     });
@@ -28,23 +28,23 @@ var register = async (req, res) => {
 
   var userInfo = {
     name: name,
-    email: userEmail,
-    phone: userPhone,
+    email: email,
+    phone: phone,
   };
   res.status(201).json({ message: "Registration success", user: { userInfo } });
 };
 
 var login = async (req, res) => {
-  const { userEmail, password } = req.body;
+  const { email, password } = req.body;
 
   // Validate input
-  if (!userEmail) {
+  if (!email) {
     return res
       .status(400)
       .json({ error: "Email is required, Please enter your email" });
   }
 
-  if (!userEmail.includes("@")) {
+  if (!email.includes("@")) {
     return res
       .status(400)
       .json({ error: "Invalid email format, Please enter a valid email" });
@@ -58,7 +58,7 @@ var login = async (req, res) => {
 
   res
     .status(200)
-    .json({ message: "User logged in successfully", user: { userEmail } });
+    .json({ message: "User logged in successfully", user: { email, password } });
 };
 
 // Export the functions

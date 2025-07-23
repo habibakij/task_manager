@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const multer = require("multer")
 
 const {
   notFoundMiddleware,
@@ -12,6 +13,7 @@ const authRouter = require("./app_routes/auth");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(multer().none()); // for handling multipart/form-data
 
 // routes
 app.get("/api/v1/task_list", (req, res) => {
