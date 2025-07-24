@@ -1,23 +1,22 @@
-const mysql = require("mysql2");
-const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const mysql = require("mysql2/promise");
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER,
-});
+let dbConnnection;
+async function connectDB() {
+  try {
+    dbConnnection = await mysql.createConnection({
+      host: process.env.DB_HOST || "localhost",
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME || "TASK_MANAGER",
+    });
 
-const password = process.env.DB_PASSWORD;
-const database = process.env.DB_NAME || "task_manager";
-if (password) {
-  db.config.password = password;
-}
-db.config.database = database;
-db.connect((err) => {
-  if (err) {
-    console.error("Error connecting to the database:", err);
-    return;
+    console.log("✅ Connected to the database");
+    return dbConnnection;
+  } catch (err) {
+    console.error("❌ Error connecting to the database:", err);
+    process.exit(1);
   }
-  console.log("Connected to the database");
-});
+}
 
-module.exports = db;
+module.exports = connectDB;
