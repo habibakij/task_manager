@@ -12,25 +12,29 @@ var register = async (req, res) => {
     });
   }
 
-   // Validate input
+   // input validation
   if (!name) {
-    return res.status(400).json({ error: "Name is required" });
+    return res.status(400).json({ error: "Name is required, Please enter your name" });
   }
   if (!email) {
-    return res.status(400).json({ error: "Email is required" });
+    return res.status(400).json({ error: "Email is required, Please enter your email" });
   }
+  if (!email.includes("@")) {
+    return res.status(400).json({ error: "Invalid email adress, Please enter valid email address" });
+  }
+  // if (!email.endsWith(".com")) {
+  //   return res.status(400).json({ error: "Email must end with .com" });
+  // }
   if (!phone) {
-    return res.status(400).json({ error: "Phone is required" });
+    return res.status(400).json({ error: "Phone is required, Please enter your phone number" });
   }
   if (!password) {
-    return res.status(400).json({ error: "Password is required" });
+    return res.status(400).json({ error: "Password is required, Please enter password" });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters" });
   }
   
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   try {
     const dbConnection = await connectDB();
 
@@ -40,7 +44,7 @@ var register = async (req, res) => {
       [email]
     );
     if (existing.length > 0) {
-      return res.status(400).json({ error: "Email already exists" });
+      return res.status(400).json({ error: "Email already exists, Please try with differents" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,8 +55,8 @@ var register = async (req, res) => {
 
     const response = {
       message: "User registered successfully",
-      userId: result.insertId,
       userInfo: {
+        id: result.insertId,
         name: name,
         phone: phone,
         email: email,
@@ -77,37 +81,51 @@ var login = async (req, res) => {
     });
   }
 
-  // Validate input
-  if (!email) {
-    return res
-      .status(400)
-      .json({ error: "Email is required, Please enter your email" });
+  // input validation
+ if (!email) {
+    return res.status(400).json({ error: "Email is required, Please enter your email" });
   }
-
   if (!email.includes("@")) {
-    return res
-      .status(400)
-      .json({ error: "Invalid email format, Please enter a valid email" });
+    return res.status(400).json({ error: "Invalid email adress, Please enter valid email address" });
   }
-
   if (!password) {
-    return res.status(400).json({
-      error: "Password is required, Please enter your password",
+    return res.status(400).json({ error: "Password is required, Please enter password" });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters" });
+  }
+
+   try {
+    const dbConnection = await connectDB();
+    const [findUser] = await dbConnection.execute(
+      "SELECT * FROM USER_TABLE WHERE email = ?",
+      [email]
+    );
+    if (findUser.length === 0) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const user = findUser[0];
+    const isMatch = await bcrypt.compare(password, user.userPassword);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const userResponse = {
+      id: user.id,
+      name: user.name,
+      phone: user.phone,
+      email: user.email,
+    };
+
+    res.status(200).json({
+      message: "Login successful",
+      user: userResponse,
     });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const isPasswordValid = await bcrypt.compare(password, hashedPassword);
-  if(!isPasswordValid){
-    return res.status(401).json({ error: "Invalid credentials" });
-  }
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-    expiresIn: "10minutes",
-  });
-
-  res
-    .status(200)
-    .json({ message: "User logged in successfully", user: { email, password } });
 };
 
 // Export the functions
