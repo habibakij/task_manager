@@ -12,29 +12,38 @@ var register = async (req, res) => {
     });
   }
 
-   // input validation
+  // input validation
   if (!name) {
-    return res.status(400).json({ error: "Name is required, Please enter your name" });
+    return res
+      .status(400)
+      .json({ error: "Name is required, Please enter your name" });
   }
   if (!email) {
-    return res.status(400).json({ error: "Email is required, Please enter your email" });
+    return res
+      .status(400)
+      .json({ error: "Email is required, Please enter your email" });
   }
   if (!email.includes("@")) {
-    return res.status(400).json({ error: "Invalid email adress, Please enter valid email address" });
+    return res.status(400).json({
+      error: "Invalid email address, Please enter valid email address",
+    });
   }
-  // if (!email.endsWith(".com")) {
-  //   return res.status(400).json({ error: "Email must end with .com" });
-  // }
   if (!phone) {
-    return res.status(400).json({ error: "Phone is required, Please enter your phone number" });
+    return res
+      .status(400)
+      .json({ error: "Phone is required, Please enter your phone number" });
   }
   if (!password) {
-    return res.status(400).json({ error: "Password is required, Please enter password" });
+    return res
+      .status(400)
+      .json({ error: "Password is required, Please enter password" });
   }
   if (password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters" });
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 6 characters" });
   }
-  
+
   try {
     const dbConnection = await connectDB();
 
@@ -44,7 +53,9 @@ var register = async (req, res) => {
       [email]
     );
     if (existing.length > 0) {
-      return res.status(400).json({ error: "Email already exists, Please try with differents" });
+      return res
+        .status(400)
+        .json({ error: "Email already exists, Please try with different" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -60,7 +71,6 @@ var register = async (req, res) => {
         name: name,
         phone: phone,
         email: email,
-        password: hashedPassword,
       },
     };
 
@@ -82,20 +92,28 @@ var login = async (req, res) => {
   }
 
   // input validation
- if (!email) {
-    return res.status(400).json({ error: "Email is required, Please enter your email" });
+  if (!email) {
+    return res
+      .status(400)
+      .json({ error: "Email is required, Please enter your email" });
   }
   if (!email.includes("@")) {
-    return res.status(400).json({ error: "Invalid email adress, Please enter valid email address" });
+    return res.status(400).json({
+      error: "Invalid email address, Please enter valid email address",
+    });
   }
   if (!password) {
-    return res.status(400).json({ error: "Password is required, Please enter password" });
+    return res
+      .status(400)
+      .json({ error: "Password is required, Please enter password" });
   }
   if (password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters" });
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 6 characters" });
   }
 
-   try {
+  try {
     const dbConnection = await connectDB();
     const [findUser] = await dbConnection.execute(
       "SELECT * FROM USER_TABLE WHERE email = ?",
@@ -128,5 +146,5 @@ var login = async (req, res) => {
   }
 };
 
-// Export the functions
+// Export
 module.exports = { register, login };
