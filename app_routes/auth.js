@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { register, login } = require("../app_controllers/auth_controller");
 
-// Register route
+// Registration route
 router.post("/register", register);
 
 // Login route

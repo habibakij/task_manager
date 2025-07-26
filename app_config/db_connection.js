@@ -5,10 +5,12 @@ let dbConnection;
 async function connectDB() {
   try {
     dbConnection = await mysql.createConnection({
+      /// laptop connection
       host: process.env.DB_HOST || "localhost",
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME || "TASK_MANAGER",
+      /// desktop connection
       // host: "localhost",
       // user: "root",
       // password: "",
