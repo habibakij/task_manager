@@ -107,11 +107,6 @@ var login = async (req, res) => {
       .status(400)
       .json({ error: "Password is required, Please enter password" });
   }
-  if (password.length < 6) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 6 characters" });
-  }
 
   try {
     const dbConnection = await connectDB();

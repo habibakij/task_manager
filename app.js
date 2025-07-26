@@ -9,6 +9,7 @@ const {
   errorHandlerMiddleware,
 } = require("./app_middleware/error_handler");
 const authRouter = require("./app_routes/auth");
+const taskRouter= require("./app_routes/task");
 
 // middleware
 app.use(express.json());
@@ -17,11 +18,9 @@ app.use(cors());
 app.use(multer().none());
 
 // routes
-app.get("/api/v1/task_list", (req, res) => {
-  res.send("Welcome to the API");
-});
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/task", taskRouter);
 
 // error handling middleware
 app.use(notFoundMiddleware);

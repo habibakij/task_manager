@@ -1,12 +1,10 @@
 const express = require("express");
-const route = express.Router();
+const taskRoute = express.Router();
 
-route.get("list", list());
+const {insertTask, getTaskList } = require("../app_controllers/task_controller");
 
-route.get("id", list());
+taskRoute.post("/add", insertTask);
 
-route.post("insert", list());
+taskRoute.get("/get/list", getTaskList);
 
-route.put("id", list());
-
-route.delete("id", list());
+module.exports = taskRoute;
