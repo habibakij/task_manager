@@ -10,6 +10,7 @@ const {
 } = require("./app_middleware/error_handler");
 const authRouter = require("./app_routes/auth");
 const taskRouter= require("./app_routes/task");
+const userRouter = require("./app_routes/user");
 
 // middleware
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use(multer().none());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/task", taskRouter);
+app.use("/api/v1/user", userRouter);
 
 // error handling middleware
 app.use(notFoundMiddleware);

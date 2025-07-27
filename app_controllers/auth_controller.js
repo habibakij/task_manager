@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const connectDB = require("../app_config/db_connection");
+const { tokenGenerate } = require("../utils/jwt_token");
 
 var register = async (req, res) => {
   const { name, email, phone, password, ...extraFields } = req.body;
@@ -11,8 +12,7 @@ var register = async (req, res) => {
       error: `Unexpected fields: ${Object.keys(extraFields).join(", ")}`,
     });
   }
-
-  // input validation
+  
   if (!name) {
     return res
       .status(400)
@@ -64,8 +64,11 @@ var register = async (req, res) => {
       [name, phone, email, hashedPassword]
     );
 
+    const token = tokenGenerate({ id: result.insertId, name: name, phone: phone, email: email });
+
     const response = {
       message: "User registered successfully",
+      token: token,
       userInfo: {
         id: result.insertId,
         name: name,
@@ -91,7 +94,6 @@ var login = async (req, res) => {
     });
   }
 
-  // input validation
   if (!email) {
     return res
       .status(400)
@@ -124,6 +126,8 @@ var login = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
+    const token = tokenGenerate({ id: user.id, name: user.name, phone: user.phone, email: user.email });
+
     const userResponse = {
       id: user.id,
       name: user.name,
@@ -133,6 +137,7 @@ var login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
+      token: token,
       user: userResponse,
     });
   } catch (error) {
