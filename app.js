@@ -1,8 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const helmet = require("helmet");
+const limit = require("express-rate-limit");
 
 const app = express();
+const limiter = limit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests, please try again later.",
+});
 
 const {
   notFoundMiddleware,
@@ -17,6 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(multer().none());
+app.use(helmet());
+app.use(limiter);
 
 // routes
 
@@ -27,12 +36,6 @@ app.use("/api/v1/user", userRouter);
 // error handling middleware
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
-
-// server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}...`);
-});
 
 // export the app for testing purposes
 module.exports = app;
