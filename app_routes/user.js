@@ -1,9 +1,13 @@
 const express = require("express");
 const userRouter = express.Router();
-const getProfile = require("../app_controllers/user_controller");
+const {
+  getProfileData,
+  updateUserProfile,
+} = require("../app_controllers/user_controller");
 const tokenAuthentication = require("../app_middleware/authorization");
 
+userRouter.get("/profile", tokenAuthentication, getProfileData);
 
-userRouter.get("/profile", tokenAuthentication, getProfile);
+userRouter.put("/profile/update", tokenAuthentication, updateUserProfile);
 
 module.exports = userRouter;
