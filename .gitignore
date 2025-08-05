@@ -18,5 +18,5 @@ npm-debug.log*
 # Optional: Ignore build/dist folders (if you build frontend or use TypeScript)
 dist/
 build/
-
+prisma/
 /generated/prisma
