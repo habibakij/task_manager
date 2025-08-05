@@ -5,6 +5,7 @@ node_modules/
 .env
 
 # Package files (You requested this)
+package-lock.json
 
 # Logs
 logs
@@ -17,3 +18,5 @@ npm-debug.log*
 # Optional: Ignore build/dist folders (if you build frontend or use TypeScript)
 dist/
 build/
+
+/generated/prisma
