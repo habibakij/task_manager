@@ -1,97 +1,231 @@
-const connectDB = require("../app_config/db_connection");
+const { PrismaClient } = require("@prisma/client");
+const { z } = require("zod");
 
-// Inserts a new task into the database
+const prisma = new PrismaClient();
+
+/// Create new task
+const taskWriteSchema = z.object({
+  title: z
+    .string()
+    .nonempty("Title is required")
+    .min(2, "Title must be at least 2 characters"),
+
+  description: z
+    .string()
+    .nonempty("Description is required")
+    .min(10, "Description must be at least 10 characters"),
+
+  startDate: z
+    .string()
+    .nonempty("Start Date is required")
+    .min(2, "Start Date must be at least 2 characters"),
+
+  endDate: z
+    .string()
+    .nonempty("End Date is required")
+    .min(2, "End Date must be at least 2 characters"),
+});
+
 var insertTask = async (req, res) => {
-  const { title, description, startDate, endDate } = req.body;
-
-  if (!title || !description || !startDate || !endDate) {
-    return res.status(400).json({
-      error: "All fields are required, Please fill all fields",
-    });
-  }
-
-  try{
-    const dbConnection = await connectDB();
-    const [tasks] = await dbConnection.execute(
-      "INSERT INTO TASK_TABLE (title, description, startDate, endDate) VALUES (?, ?, ?, ?)",
-      [title, description, startDate, endDate]
-    );
-
-    const result = {
-      id: tasks.insertId,
-      title,
-      description,
-      startDate: startDate,
-      endDate: endDate,
-    }
-    res.status(201).json({
-      message: "Task created successfully",
-      task: result, 
-    });
-  } catch (error) {
-    console.error("Error creating task:", error);
-    res.status(500).json({ error: "Internal server error: "+ error.message });
-  }
-};
-
-// Fetches the list of tasks from the database
-var getTaskList = async (req, res) => {
   try {
-    const dbConnection = await connectDB();
-    const [tasks] = await dbConnection.execute("SELECT * FROM TASK_TABLE");
-    res.status(200).json({ message: "Task list", tasks });
+    /// Input validation
+    const parsed = taskWriteSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errorMessage = parsed.error.issues.map((e) => e.message).join(", ");
+      return res.status(400).json({ error: errorMessage });
+    }
+
+    /// create task
+    const { title, description, startDate, endDate } = parsed.data;
+    const data = await prisma.taskTable.create({
+      data: { title, description, startDate, endDate },
+    });
+
+    /// Success response
+    return res.status(201).json({
+      data: {
+        message: "Task created successfully",
+        task: data,
+      },
+    });
   } catch (error) {
-    console.error("Error fetching tasks:", error);
-    res.status(500).json({ error: "Internal server error: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error: " + error.message });
   }
 };
+
+// Fetch task list
+var getAllTask = async (req, res) => {
+  try {
+    const data = await prisma.taskTable.findMany({
+      //orderBy: { createdAt: "desc" },
+    });
+
+    /// Success response
+    return res.status(201).json({
+      data: {
+        message: "Fetch successfully",
+        count: data.length,
+        data: data,
+      },
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Internal server error: " + error.message });
+  }
+};
+
+// Fetch single task
+var getSingleTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Task ID is required" });
+    }
+
+    const data = await prisma.taskTable.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    /// Check exist task
+    if (!data) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    /// Success response
+    return res.status(201).json({
+      data: {
+        message: "Fetch successfully",
+        data: data,
+      },
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Internal server error: " + error.message });
+  }
+};
+
+// Update single task
+// Schema for task update (all fields optional)
+const taskUpdateSchema = z.object({
+  title: z.string().min(1, "Title cannot be empty").optional(),
+  description: z.string().min(1, "Description cannot be empty").optional(),
+  startDate: z.string().min(1, "Start date cannot be empty").optional(),
+  endDate: z.string().min(1, "End date cannot be empty").optional(),
+});
 
 var taskUpdate = async (req, res) => {
-  const taskId = req.params.id;
-  const { title, description, startDate, endDate } = req.body;
-   if (!taskId) {
-    return res.status(400).json({ error: "Task ID is required" });
-  }
-  if (!title || !description || !startDate || !endDate) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
   try {
-    const dbConnection = await connectDB();
-    const [result] = await dbConnection.execute(
-      "UPDATE TASK_TABLE SET title = ?, description = ?, startDate = ?, endDate = ? WHERE id = ?",
-      [title, description, startDate, endDate, taskId]
-    );
-    if (result.affectedRows === 0) {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "Task ID is required" });
+    }
+
+    /// Input validation
+    const parsed = taskUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errorMessage = parsed.error.issues.map((e) => e.message).join(", ");
+      return res.status(400).json({ error: errorMessage });
+    }
+
+    /// Check if request body is empty
+    if (Object.keys(parsed.data).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "At least one field is required to update" });
+    }
+
+    const data = await prisma.taskTable.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    /// Check exist task
+    if (!data) {
       return res.status(404).json({ error: "Task not found" });
     }
-    res.status(200).json({ message: "Task updated successfully" });
+
+    const updateData = await prisma.taskTable.update({
+      where: { id: parseInt(id) },
+      data: parsed.data,
+    });
+
+    /// Success response
+    return res.status(201).json({
+      data: {
+        message: "Update successfully",
+        data: updateData,
+      },
+    });
   } catch (error) {
-    console.error("Error updating task:", error);
-    res.status(500).json({ error: "Internal server error: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error: " + error.message });
   }
 };
 
-// Deletes a task by ID
+// Deletes task
 var taskDelete = async (req, res) => {
-  const taskId = req.params.id;
-  if (!taskId) {
-    return res.status(400).json({ error: "Task ID is required" });
-  }
   try {
-    const dbConnection = await connectDB();
-    const [result] = await dbConnection.execute(
-      "DELETE FROM TASK_TABLE WHERE id = ?", [taskId]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Task not found" });
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "Task ID is required" });
     }
 
-    res.status(201).json({ message: "Task deleted successfully" });
+    const data = await prisma.taskTable.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    /// Check exist task
+    if (!data) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+    /// Delete task
+    await prisma.taskTable.delete({
+      where: { id: parseInt(id) },
+    });
+
+    /// Success response
+    return res.status(200).json({
+      data: {
+        message: "Deleted successfully",
+        data: data,
+      },
+    });
   } catch (error) {
-    console.error("Error deleting task:", error);
-    res.status(500).json({ error: "Internal server error: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error: " + error.message });
   }
 };
 
-module.exports = { insertTask, getTaskList, taskUpdate, taskDelete };
+/// Delete all
+var deleteAllTask = async (req, res) => {
+  try {
+    const data = await prisma.taskTable.deleteMany({});
+
+    /// Success response
+    return res.status(200).json({
+      data: {
+        message: "All tasks deleted successfully",
+        deletedCount: data.count,
+      },
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Internal server error: " + error.message });
+  }
+};
+
+module.exports = {
+  insertTask,
+  getAllTask,
+  getSingleTask,
+  taskUpdate,
+  taskDelete,
+  deleteAllTask,
+};

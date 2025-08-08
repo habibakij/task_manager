@@ -7,7 +7,7 @@ const notFoundMiddleware = (req, res) => {
 // errorHandlerMiddleware.js
 // This middleware handles errors that occur in the application.
 const errorHandlerMiddleware = (err, req, res, next) => {
-  console.log(err);
+  console.log("error_middleware: " + err.message);
   const defaultError = {
     statusCode: 500,
     msg: "Something went wrong, please try again later",
