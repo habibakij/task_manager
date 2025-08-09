@@ -58,9 +58,7 @@ var insertTask = async (req, res) => {
 // Fetch task list
 var getAllTask = async (req, res) => {
   try {
-    const data = await prisma.taskTable.findMany({
-      //orderBy: { createdAt: "desc" },
-    });
+    const data = await prisma.taskTable.findMany({});
 
     /// Success response
     return res.status(201).json({

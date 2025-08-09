@@ -30,7 +30,7 @@ app.use(limiter);
 // routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1", taskRouter);
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1", userRouter);
 
 // error handling middleware
 app.use(notFoundMiddleware);

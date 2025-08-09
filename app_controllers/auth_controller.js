@@ -14,7 +14,7 @@ const registerSchema = z.object({
 
   email: z
     .string()
-    .min(1, "Email is required")
+    .min(3, "Email is required")
     .refine((val) => /\S+@\S+\.\S+/.test(val), "Invalid email format"),
 
   phone: z
