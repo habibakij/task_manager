@@ -14,8 +14,8 @@ A RESTful API for managing tasks built with Node.js, Express.js, Prisma ORM, and
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Node.js, Express.js
-- **Database**: PostgreSQL/MySQL with Prisma ORM
+- **Backend**: Express.js
+- **Database**: MySQL with Prisma ORM
 - **Authentication**: JWT (JSON Web Tokens)
 - **Validation**: Zod schema validation
 - **Password Hashing**: Bcryptjs
@@ -27,7 +27,7 @@ Before running this project, make sure you have:
 
 - Node.js (v14 or higher)
 - npm or yarn
-- PostgreSQL or MySQL database
+- MySQL database
 - Git
 
 ## ⚙️ Installation
