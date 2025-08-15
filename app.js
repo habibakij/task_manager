@@ -6,7 +6,6 @@ const limit = require("express-rate-limit");
 
 const authRouter = require("./app_routes/auth");
 const taskRouter = require("./app_routes/task");
-const userRouter = require("./app_routes/user");
 const {
   notFoundMiddleware,
   errorHandlerMiddleware,
@@ -30,7 +29,6 @@ app.use(limiter);
 // routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1", taskRouter);
-app.use("/api/v1", userRouter);
 
 // error handling middleware
 app.use(notFoundMiddleware);
