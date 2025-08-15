@@ -8,24 +8,40 @@ const prisma = new PrismaClient();
 // Schema Validation
 const registerSchema = z.object({
   name: z
-    .string()
-    .nonempty("Name is required")
+    .string({
+      required_error: "Name is required",
+      invalid_type_error: "Name is required",
+    })
     .min(2, "Name must be at least 2 characters"),
 
   email: z
-    .string()
-    .min(3, "Email is required")
+    .string({
+      required_error: "Email is required",
+      invalid_type_error: "Email is required",
+    })
     .refine((val) => /\S+@\S+\.\S+/.test(val), "Invalid email format"),
 
   phone: z
-    .string()
-    .nonempty("Phone is required")
+    .string({
+      required_error: "Phone is required",
+      invalid_type_error: "Phone is required",
+    })
     .min(10, "Phone must be at least 10 characters"),
 
   password: z
-    .string()
-    .nonempty("Password is required")
+    .string({
+      required_error: "Password is required",
+      invalid_type_error: "Password is required",
+    })
     .min(6, "Password must be at least 6 characters"),
+
+  // Optional fields
+  profilePic: z.string().optional(),
+  gender: z.string().optional(),
+  birthDate: z.string().optional(),
+  address: z.string().optional(),
+  profession: z.string().optional(),
+  nationality: z.string().optional(),
 });
 
 const register = async (req, res) => {
@@ -38,10 +54,21 @@ const register = async (req, res) => {
       return res.status(400).json({ error: errorMessage });
     }
 
-    const { name, email, phone, password } = parsed.data;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      profilePic,
+      gender,
+      birthDate,
+      address,
+      profession,
+      nationality,
+    } = parsed.data;
 
     /// Check user exists
-    const existingUser = await prisma.userAuth.findUnique({
+    const existingUser = await prisma.userRegistration.findUnique({
       where: { email },
     });
 
@@ -53,12 +80,18 @@ const register = async (req, res) => {
 
     /// Password Hashing and create user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await prisma.userAuth.create({
+    const newUser = await prisma.userRegistration.create({
       data: {
         name,
         email,
         phone,
         userPassword: hashedPassword,
+        profilePic: profilePic ?? null,
+        gender: gender ?? null,
+        birthDate: birthDate ?? null,
+        address: address ?? null,
+        profession: profession ?? null,
+        nationality: nationality ?? null,
       },
     });
 
@@ -73,7 +106,7 @@ const register = async (req, res) => {
       });
     } catch (tokenError) {
       // If token generation fails, delete the created user
-      await prisma.userAuth.delete({
+      await prisma.userRegistration.delete({
         where: { id: newUser.id },
       });
 
@@ -92,6 +125,12 @@ const register = async (req, res) => {
           name: newUser.name,
           email: newUser.email,
           phone: newUser.phone,
+          profilePic: newUser.profilePic,
+          gender: newUser.gender,
+          birthDate: newUser.birthDate,
+          address: newUser.address,
+          profession: newUser.profession,
+          nationality: newUser.nationality,
         },
       },
     });
@@ -125,7 +164,7 @@ var login = async (req, res) => {
     const { email, password } = parsed.data;
 
     /// Find user
-    const user = await prisma.userAuth.findUnique({ where: { email } });
+    const user = await prisma.userRegistration.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -163,7 +202,7 @@ var login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error " + error.message });
+    res.status(500).json({ error: "Internal server error: " + error.message });
   }
 };
 
